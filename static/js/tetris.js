@@ -120,11 +120,6 @@ const PIECES = [
   ]),
 ];
 
-let gameLoop = () => {
-  setInterval(update, 1000 / GAME_SPEED);
-  setInterval(draw, 1000 / FPS);
-};
-
 let fallCurrentPiece = () => {
   if (!GAME_STATE.currentPiece.checkBottom()) {
     const pieceTemplate = GAME_STATE.currentPiece.template;
@@ -264,6 +259,11 @@ let resetGameState = () => {
   GAME_STATE.isGameOver = false;
   GAME_STATE.currentPiece = getRandomPiece();
   GAME_STATE.nextPiece = getRandomPiece();
+};
+
+let gameLoop = () => {
+  setInterval(update, 1000 / GAME_SPEED);
+  setInterval(draw, 1000 / FPS);
 };
 
 let init = () => {
