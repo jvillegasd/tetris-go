@@ -38,10 +38,8 @@ class TetrixPiece {
           this.imageY,
           SQUARE_SPRITE_SIZE,
           SQUARE_SPRITE_SIZE,
-          Math.trunc(this.x) * SQUARE_CANVAS_SIZE +
-            SQUARE_CANVAS_SIZE * i,
-          Math.trunc(this.y) * SQUARE_CANVAS_SIZE +
-            SQUARE_CANVAS_SIZE * j,
+          Math.trunc(this.x) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * i,
+          Math.trunc(this.y) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * j,
           SQUARE_CANVAS_SIZE,
           SQUARE_CANVAS_SIZE
         );
@@ -49,7 +47,17 @@ class TetrixPiece {
     }
   }
 
-  checkBottom() {}
+  checkBottom() {
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (!this.template[i][j]) continue;
+        // TODO: Check if block can move to bottom
+        let mapX = Math.trunc(this.x) + i;
+        let mapY = Math.trunc(thix.y) + j;
+      }
+    }
+    return true;
+  }
 
   checkLeft() {}
 
@@ -107,7 +115,12 @@ let gameLoop = () => {
   setInterval(draw, 1000 / FPS);
 };
 
-let update = () => {};
+let update = () => {
+  if (GAME_STATE.isGameOver) return;
+  if (GAME_STATE.currentPiece.checkBottom()) {
+    GAME_STATE.currentPiece.y += 1;
+  }
+};
 
 let drawRect = (x, y, width, height, colorHex) => {
   ctx.fillStyle = colorHex;
@@ -145,14 +158,14 @@ let draw = () => {
 let getRandomPiece = () => {
   const pieceIndex = Math.floor(Math.random() * PIECES.length);
   return Object.create(PIECES[pieceIndex]);
-}
+};
 
 let resetGameState = () => {
   GAME_STATE.gameMap = [];
   for (let i = 0; i < squareCountX; i++) {
     let mapRow = [];
     for (let j = 0; j < squareCountY; j++) {
-      mapRow.push({imageX: -1, imageY: -1});
+      mapRow.push({ imageX: -1, imageY: -1 });
     }
     GAME_STATE.gameMap.push(mapRow);
   }
@@ -161,6 +174,11 @@ let resetGameState = () => {
   GAME_STATE.isGameOver = false;
   GAME_STATE.currentPiece = getRandomPiece();
   GAME_STATE.nextPiece = getRandomPiece();
-}
+};
 
-gameLoop();
+let init = () => {
+  resetGameState();
+  gameLoop();
+};
+
+init();
