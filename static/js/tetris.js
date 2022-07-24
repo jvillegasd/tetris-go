@@ -2,18 +2,22 @@ const FPS = 24;
 const GAME_SPEED = 5;
 const SQUARE_SPRITE_SIZE = 24;
 const SQUARE_CANVAS_SIZE = 40;
-const BACKGROUND_COLOR = '#17a398';
+const BACKGROUND_COLOR = "#17a398";
 const BACKGROUND_LINE_THICKNESS = 4;
-const BACKGROUND_LINE_COLOR = '#e7ecef';
-const canvas = document.getElementById('game_canvas');
-const spriteSheet = document.getElementById('sprite_sheet');
-const ctx = canvas.getContext('2d');
+const BACKGROUND_LINE_COLOR = "#e7ecef";
+const BOARD_BACKGROUND_COLOR = "#6f9ceb";
+const canvas = document.getElementById("game_canvas");
+const nextPieceCanvas = document.getElementById("next_piece_canvas")
+const spriteSheet = document.getElementById("sprite_sheet");
+const ctx = canvas.getContext("2d");
+const nextPieceCtx = nextPieceCanvas.getContext("2d");
 const squareCountX = canvas.width / SQUARE_CANVAS_SIZE;
 const squareCountY = canvas.height / SQUARE_CANVAS_SIZE;
 
 const GAME_STATE = {
   score: 0,
   gameMap: [],
+  nextPiece: null,
   currentPiece: null,
   isGameOver: false,
 };
@@ -27,18 +31,21 @@ class TetrixPiece {
     this.y = 0;
   }
 
-  draw() {
+  draw(canvasContext, offset) {
     for (let i = 0; i < this.template.length; i++) {
       for (let j = 0; j < this.template.length; j++) {
-        if (this.template[i][j] == 0) continue;
-        ctx.drawImage(
+        if (this.template[i][j] === 0) continue;
+
+        canvasContext.drawImage(
           spriteSheet,
           this.imageX,
           this.imageY,
           SQUARE_SPRITE_SIZE,
           SQUARE_SPRITE_SIZE,
-          Math.trunc(this.x) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * i,
-          Math.trunc(this.y) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * j,
+          // Math.trunc(this.x) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * j,
+          // Math.trunc(this.y) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * i,
+          offset.x + SQUARE_CANVAS_SIZE * j,
+          offset.y + SQUARE_CANVAS_SIZE * i,
           SQUARE_CANVAS_SIZE,
           SQUARE_CANVAS_SIZE
         );
@@ -50,6 +57,7 @@ class TetrixPiece {
     for (let i = 0; i < this.template.length; i++) {
       for (let j = 0; j < this.template.length; j++) {
         if (!this.template[i][j]) continue;
+
         let pixelX = Math.trunc(this.x) + j;
         let pixelY = Math.trunc(this.y) + i;
 
@@ -125,6 +133,7 @@ let fallCurrentPiece = () => {
     for (let i = 0; i < pieceTemplate.length; i++) {
       for (let j = 0; j < pieceTemplate.length; j++) {
         if (pieceTemplate[i][j] === 0) continue;
+
         let pixelX = Math.trunc(GAME_STATE.currentPiece.x) + j;
         let pixelY = Math.trunc(GAME_STATE.currentPiece.y) + i;
 
@@ -141,12 +150,17 @@ let fallCurrentPiece = () => {
   return true;
 };
 
+let spawnNextPiece = () => {
+  GAME_STATE.currentPiece = GAME_STATE.nextPiece;
+  GAME_STATE.nextPiece = getRandomPiece();
+}
+
 let update = () => {
   if (GAME_STATE.isGameOver) return;
 
   const pieceFalled = fallCurrentPiece();
   if (!pieceFalled) {
-    GAME_STATE.currentPiece = getRandomPiece();
+    spawnNextPiece();
   }
 };
 
@@ -177,10 +191,51 @@ let drawBackground = () => {
   }
 };
 
+let drawNextPieceBoard = () => {
+  nextPieceCtx.fillStyle = BOARD_BACKGROUND_COLOR;
+  nextPieceCtx.fillRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
+  
+  const offset = {
+    x: SQUARE_CANVAS_SIZE,
+    y: SQUARE_CANVAS_SIZE
+  }
+  GAME_STATE.nextPiece.draw(nextPieceCtx, offset);
+}
+
+let drawCurrentPiece = () => {
+  const offset = {
+    x: Math.trunc(GAME_STATE.currentPiece.x) * SQUARE_CANVAS_SIZE,
+    y: Math.trunc(GAME_STATE.currentPiece.y) * SQUARE_CANVAS_SIZE
+  }
+  GAME_STATE.currentPiece.draw(ctx, offset);
+}
+
+let drawPlacedPieces = () => {
+  for (let i = 0; i < squareCountY; i++) {
+    for (let j = 0; j < squareCountX; j++) {
+      if (GAME_STATE.gameMap[i][j].imageX === -1) continue;
+
+      ctx.drawImage(
+        spriteSheet,
+        GAME_STATE.gameMap[i][j].imageX,
+        GAME_STATE.gameMap[i][j].imageY,
+        SQUARE_SPRITE_SIZE,
+        SQUARE_SPRITE_SIZE,
+        SQUARE_CANVAS_SIZE * j,
+        SQUARE_CANVAS_SIZE * i,
+        SQUARE_CANVAS_SIZE,
+        SQUARE_CANVAS_SIZE
+      );
+    }
+  }
+};
+
 let draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
-  GAME_STATE.currentPiece.draw();
+  drawPlacedPieces();
+  drawNextPieceBoard();
+  drawCurrentPiece();
 };
 
 let getRandomPiece = () => {
@@ -201,6 +256,7 @@ let resetGameState = () => {
   GAME_STATE.score = 0;
   GAME_STATE.isGameOver = false;
   GAME_STATE.currentPiece = getRandomPiece();
+  GAME_STATE.nextPiece = getRandomPiece();
 };
 
 let init = () => {
