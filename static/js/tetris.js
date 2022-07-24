@@ -2,15 +2,15 @@ const FPS = 24;
 const GAME_SPEED = 5;
 const SQUARE_SPRITE_SIZE = 24;
 const SQUARE_CANVAS_SIZE = 40;
-const BACKGROUND_COLOR = "#17a398";
+const BACKGROUND_COLOR = '#17a398';
 const BACKGROUND_LINE_THICKNESS = 4;
-const BACKGROUND_LINE_COLOR = "#e7ecef";
-const BOARD_BACKGROUND_COLOR = "#6f9ceb";
-const canvas = document.getElementById("game_canvas");
-const nextPieceCanvas = document.getElementById("next_piece_canvas")
-const spriteSheet = document.getElementById("sprite_sheet");
-const ctx = canvas.getContext("2d");
-const nextPieceCtx = nextPieceCanvas.getContext("2d");
+const BACKGROUND_LINE_COLOR = '#e7ecef';
+const BOARD_BACKGROUND_COLOR = '#6f9ceb';
+const canvas = document.getElementById('game_canvas');
+const nextPieceCanvas = document.getElementById('next_piece_canvas');
+const spriteSheet = document.getElementById('sprite_sheet');
+const ctx = canvas.getContext('2d');
+const nextPieceCtx = nextPieceCanvas.getContext('2d');
 const squareCountX = canvas.width / SQUARE_CANVAS_SIZE;
 const squareCountY = canvas.height / SQUARE_CANVAS_SIZE;
 
@@ -42,10 +42,8 @@ class TetrixPiece {
           this.imageY,
           SQUARE_SPRITE_SIZE,
           SQUARE_SPRITE_SIZE,
-          // Math.trunc(this.x) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * j,
-          // Math.trunc(this.y) * SQUARE_CANVAS_SIZE + SQUARE_CANVAS_SIZE * i,
-          offset.x + SQUARE_CANVAS_SIZE * j,
-          offset.y + SQUARE_CANVAS_SIZE * i,
+          SQUARE_CANVAS_SIZE * j + offset.x,
+          SQUARE_CANVAS_SIZE * i + offset.y,
           SQUARE_CANVAS_SIZE,
           SQUARE_CANVAS_SIZE
         );
@@ -153,7 +151,7 @@ let fallCurrentPiece = () => {
 let spawnNextPiece = () => {
   GAME_STATE.currentPiece = GAME_STATE.nextPiece;
   GAME_STATE.nextPiece = getRandomPiece();
-}
+};
 
 let update = () => {
   if (GAME_STATE.isGameOver) return;
@@ -164,15 +162,17 @@ let update = () => {
   }
 };
 
-let drawRect = (x, y, width, height, colorHex) => {
-  ctx.fillStyle = colorHex;
-  ctx.fillRect(x, y, width, height);
+let drawRect = (canvasContext, x, y, width, height, colorHex) => {
+  canvasContext.fillStyle = colorHex;
+  canvasContext.fillRect(x, y, width, height);
 };
 
 let drawBackground = () => {
-  drawRect(0, 0, canvas.width, canvas.height, BACKGROUND_COLOR);
+  drawRect(ctx, 0, 0, canvas.width, canvas.height, BACKGROUND_COLOR);
+
   for (let i = 0; i < squareCountX; i++) {
     drawRect(
+      ctx,
       SQUARE_CANVAS_SIZE * i - BACKGROUND_LINE_THICKNESS,
       0,
       BACKGROUND_LINE_THICKNESS,
@@ -182,6 +182,7 @@ let drawBackground = () => {
   }
   for (let i = 0; i < squareCountY; i++) {
     drawRect(
+      ctx,
       0,
       SQUARE_CANVAS_SIZE * i - BACKGROUND_LINE_THICKNESS,
       canvas.width,
@@ -192,23 +193,29 @@ let drawBackground = () => {
 };
 
 let drawNextPieceBoard = () => {
-  nextPieceCtx.fillStyle = BOARD_BACKGROUND_COLOR;
-  nextPieceCtx.fillRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
-  
+  drawRect(
+    nextPieceCtx,
+    0,
+    0,
+    nextPieceCanvas.width,
+    nextPieceCanvas.height,
+    BOARD_BACKGROUND_COLOR
+  );
+
   const offset = {
     x: SQUARE_CANVAS_SIZE,
-    y: SQUARE_CANVAS_SIZE
-  }
+    y: SQUARE_CANVAS_SIZE,
+  };
   GAME_STATE.nextPiece.draw(nextPieceCtx, offset);
-}
+};
 
 let drawCurrentPiece = () => {
   const offset = {
     x: Math.trunc(GAME_STATE.currentPiece.x) * SQUARE_CANVAS_SIZE,
-    y: Math.trunc(GAME_STATE.currentPiece.y) * SQUARE_CANVAS_SIZE
-  }
+    y: Math.trunc(GAME_STATE.currentPiece.y) * SQUARE_CANVAS_SIZE,
+  };
   GAME_STATE.currentPiece.draw(ctx, offset);
-}
+};
 
 let drawPlacedPieces = () => {
   for (let i = 0; i < squareCountY; i++) {
