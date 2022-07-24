@@ -14,7 +14,6 @@ const squareCountY = canvas.height / SQUARE_CANVAS_SIZE;
 const GAME_STATE = {
   score: 0,
   gameMap: [],
-  nextPiece: null,
   currentPiece: null,
   isGameOver: false,
 };
@@ -51,9 +50,14 @@ class TetrixPiece {
     for (let i = 0; i < this.template.length; i++) {
       for (let j = 0; j < this.template.length; j++) {
         if (!this.template[i][j]) continue;
-        // TODO: Check if block can move to bottom
-        let mapX = Math.trunc(this.x) + i;
-        let mapY = Math.trunc(thix.y) + j;
+        let pixelX = Math.trunc(this.x) + j;
+        let pixelY = Math.trunc(this.y) + i;
+
+        if (
+          pixelY + 1 >= squareCountY ||
+          GAME_STATE.gameMap[pixelY + 1][pixelX].imageX !== -1
+        )
+          return false;
       }
     }
     return true;
@@ -115,10 +119,34 @@ let gameLoop = () => {
   setInterval(draw, 1000 / FPS);
 };
 
+let fallCurrentPiece = () => {
+  if (!GAME_STATE.currentPiece.checkBottom()) {
+    const pieceTemplate = GAME_STATE.currentPiece.template;
+    for (let i = 0; i < pieceTemplate.length; i++) {
+      for (let j = 0; j < pieceTemplate.length; j++) {
+        if (pieceTemplate[i][j] === 0) continue;
+        let pixelX = Math.trunc(GAME_STATE.currentPiece.x) + j;
+        let pixelY = Math.trunc(GAME_STATE.currentPiece.y) + i;
+
+        GAME_STATE.gameMap[pixelY][pixelX] = {
+          imageX: GAME_STATE.currentPiece.imageX,
+          imageY: GAME_STATE.currentPiece.imageY,
+        };
+      }
+    }
+    return false;
+  }
+
+  GAME_STATE.currentPiece.y += 1;
+  return true;
+};
+
 let update = () => {
   if (GAME_STATE.isGameOver) return;
-  if (GAME_STATE.currentPiece.checkBottom()) {
-    GAME_STATE.currentPiece.y += 1;
+
+  const pieceFalled = fallCurrentPiece();
+  if (!pieceFalled) {
+    GAME_STATE.currentPiece = getRandomPiece();
   }
 };
 
@@ -162,9 +190,9 @@ let getRandomPiece = () => {
 
 let resetGameState = () => {
   GAME_STATE.gameMap = [];
-  for (let i = 0; i < squareCountX; i++) {
+  for (let i = 0; i < squareCountY; i++) {
     let mapRow = [];
-    for (let j = 0; j < squareCountY; j++) {
+    for (let j = 0; j < squareCountX; j++) {
       mapRow.push({ imageX: -1, imageY: -1 });
     }
     GAME_STATE.gameMap.push(mapRow);
@@ -173,7 +201,6 @@ let resetGameState = () => {
   GAME_STATE.score = 0;
   GAME_STATE.isGameOver = false;
   GAME_STATE.currentPiece = getRandomPiece();
-  GAME_STATE.nextPiece = getRandomPiece();
 };
 
 let init = () => {
