@@ -69,15 +69,59 @@ class TetrixPiece {
     return true;
   }
 
-  checkLeft() {}
+  checkLeft() {
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (!this.template[i][j]) continue;
 
-  checkRight() {}
+        let pixelX = Math.trunc(this.x) + j;
+        let pixelY = Math.trunc(this.y) + i;
 
-  moveBottom() {}
+        if (
+          pixelX - 1 < 0 ||
+          GAME_STATE.gameMap[pixelY][pixelX - 1].imageX !== -1
+        )
+          return false;
+      }
+    }
+    return true;
+  }
 
-  moveLeft() {}
+  checkRight() {
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (!this.template[i][j]) continue;
 
-  moveRight() {}
+        let pixelX = Math.trunc(this.x) + j;
+        let pixelY = Math.trunc(this.y) + i;
+
+        if (
+          pixelX + 1 >= squareCountX ||
+          GAME_STATE.gameMap[pixelY][pixelX + 1].imageX !== -1
+        )
+          return false;
+      }
+    }
+    return true;
+  }
+
+  moveBottom() {
+    if (this.checkBottom()) {
+      this.y += 1;
+    }
+  }
+
+  moveLeft() {
+    if (this.checkLeft()) {
+      this.x -= 1;
+    }
+  }
+
+  moveRight() {
+    if (this.checkRight()) {
+      this.x += 1;
+    }
+  }
 
   changeRotation() {}
 }
@@ -147,6 +191,8 @@ let spawnNextPiece = () => {
   GAME_STATE.currentPiece = GAME_STATE.nextPiece;
   GAME_STATE.nextPiece = getRandomPiece();
 };
+
+// https://tetris.fandom.com/wiki/Line_clear
 
 let update = () => {
   if (GAME_STATE.isGameOver) return;
@@ -265,6 +311,30 @@ let gameLoop = () => {
   setInterval(update, 1000 / GAME_SPEED);
   setInterval(draw, 1000 / FPS);
 };
+
+window.addEventListener('keydown', (event) => {
+  // event.preventDefault();
+  console.log(event.code);
+  switch (event.code) {
+    case 'KeyA':
+    case 'ArrowLeft':
+      GAME_STATE.currentPiece.moveLeft();
+      break;
+    case 'KeyS':
+    case 'ArrowDown':
+      GAME_STATE.currentPiece.moveBottom();
+      break;
+    case 'KeyD':
+    case 'ArrowRight':
+      GAME_STATE.currentPiece.moveRight();
+      break;
+    case 'Space':
+      GAME_STATE.currentPiece.changeRotation();
+      break;
+    default:
+      return;
+  }
+});
 
 let init = () => {
   resetGameState();
