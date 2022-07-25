@@ -108,6 +108,7 @@ class TetrixPiece {
   moveBottom() {
     if (this.checkBottom()) {
       this.y += 1;
+      GAME_STATE.score += 1;
     }
   }
 
@@ -200,6 +201,9 @@ let update = () => {
   const pieceFalled = fallCurrentPiece();
   if (!pieceFalled) {
     spawnNextPiece();
+    if (!GAME_STATE.currentPiece.checkBottom()) {
+      GAME_STATE.isGameOver = true;
+    }
   }
 };
 
@@ -281,9 +285,9 @@ let drawPlacedPieces = () => {
 let draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBackground();
-  drawPlacedPieces();
   drawNextPieceBoard();
   drawCurrentPiece();
+  drawPlacedPieces();
 };
 
 let getRandomPiece = () => {
@@ -313,8 +317,6 @@ let gameLoop = () => {
 };
 
 window.addEventListener('keydown', (event) => {
-  // event.preventDefault();
-  console.log(event.code);
   switch (event.code) {
     case 'KeyA':
     case 'ArrowLeft':
@@ -332,7 +334,7 @@ window.addEventListener('keydown', (event) => {
       GAME_STATE.currentPiece.changeRotation();
       break;
     default:
-      return;
+      break;
   }
 });
 
