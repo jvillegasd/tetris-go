@@ -124,7 +124,58 @@ class TetrixPiece {
     }
   }
 
-  changeRotation() {}
+  changeRotation() {
+    /*
+      Rotate square matrix by 90 degrees.
+      Resource: https://www.geeksforgeeks.org/inplace-rotate-square-matrix-by-90-degrees/ 
+    */
+
+    // Save current template data
+    let tempTemplate = [];
+    for (let i = 0; i < this.template.length; i++) {
+      tempTemplate[i] = this.template[i].slice();
+    }
+
+    // Rotate Tetris piece template
+    for (let i = 0; i < this.template.length / 2; i++) {
+      for (let j = i; j < this.template.length - i - 1; j++) {
+        let pixel = this.template[i][j];
+
+        this.template[i][j] = this.template[j][this.template.length - i - 1];
+
+        this.template[j][this.template.length - i - 1] =
+          this.template[this.template.length - i - 1][
+            this.template.length - j - 1
+          ];
+
+        this.template[this.template.length - i - 1][
+          this.template.length - j - 1
+        ] = this.template[this.template.length - j - 1][i];
+
+        this.template[this.template.length - j - 1][i] = pixel;
+      }
+    }
+
+    // Check if rotation is valid in game board
+    for (let i = 0; i < this.template.length; i++) {
+      for (let j = 0; j < this.template.length; j++) {
+        if (!this.template[i][j]) continue;
+
+        let pixelX = Math.trunc(this.x) + j;
+        let pixelY = Math.trunc(this.y) + i;
+
+        if (
+          pixelX < 0 ||
+          pixelX >= squareCountX ||
+          pixelY < 0 ||
+          pixelY >= squareCountY
+        ) {
+          this.template = tempTemplate;
+          return false;
+        }
+      }
+    }
+  }
 }
 
 const PIECES = [
@@ -201,6 +252,7 @@ let update = () => {
   const pieceFalled = fallCurrentPiece();
   if (!pieceFalled) {
     spawnNextPiece();
+
     if (!GAME_STATE.currentPiece.checkBottom()) {
       GAME_STATE.isGameOver = true;
     }
