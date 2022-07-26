@@ -9,6 +9,7 @@ const BOARD_BACKGROUND_COLOR = '#6f9ceb';
 const canvas = document.getElementById('game_canvas');
 const nextPieceCanvas = document.getElementById('next_piece_canvas');
 const spriteSheet = document.getElementById('sprite_sheet');
+const scoreCounter = document.getElementById('score_counter');
 const ctx = canvas.getContext('2d');
 const nextPieceCtx = nextPieceCanvas.getContext('2d');
 const squareCountX = canvas.width / SQUARE_CANVAS_SIZE;
@@ -271,6 +272,10 @@ let lineClear = () => {
   }
 };
 
+let updateScoreBoard = () => {
+  scoreCounter.innerHTML = GAME_STATE.score;
+};
+
 let update = () => {
   if (GAME_STATE.isGameOver) return;
 
@@ -283,13 +288,17 @@ let update = () => {
       GAME_STATE.isGameOver = true;
 
       Swal.fire({
-        title: "Game over!",
+        title: 'Game over!',
         text: `Your score was: ${GAME_STATE.score}, good job!`,
-        icon: "error",
-        confirmButtonText: "Try again"
-      })
+        icon: 'error',
+        confirmButtonText: 'Try again',
+      }).then(() => {
+        resetGameState();
+      });
     }
   }
+
+  updateScoreBoard();
 };
 
 let drawRect = (canvasContext, x, y, width, height, colorHex) => {
