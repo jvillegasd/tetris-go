@@ -1,16 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tetris Go</title>
-</head>
-<body>
-  <canvas id="game_canvas" width="400" height="800"></canvas>
-  <canvas id="next_piece_canvas" width="200" height="200"></canvas>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="static/css/style.css" />
+    <title>Tetris Go</title>
+  </head>
+  <body>
+    <!-- <button>Start</button> -->
 
-  <img id="sprite_sheet" src="static/img/rotations.png" style="display: none;">
-  <script src="static/js/tetris.js"></script>
-</body>
+    <main>
+      <header>
+        <h1>Tetris Go</h1>
+        <h3>Created by jvillegasd</h3>
+        <a href="https://github.com/Jvillegasd">Github</a>
+      </header>
+      <div id="game_board">
+        <canvas id="game_canvas" width="400" height="800"></canvas>
+
+        <div id="next_piece">
+          <h3>Next piece</h3>
+          <canvas id="next_piece_canvas" width="200" height="200"></canvas>
+        </div>
+      </div>
+    </main>
+
+    <img
+      id="sprite_sheet"
+      src="static/img/rotations.png"
+      style="display: none"
+    />
+    
+    <script
+      src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.24/dist/sweetalert2.all.min.js"
+    ></script>
+    <script src="static/js/tetris.js"></script>
+  </body>
 </html>

@@ -281,6 +281,13 @@ let update = () => {
 
     if (!GAME_STATE.currentPiece.checkBottom()) {
       GAME_STATE.isGameOver = true;
+
+      Swal.fire({
+        title: "Game over!",
+        text: `Your score was: ${GAME_STATE.score}, good job!`,
+        icon: "error",
+        confirmButtonText: "Try again"
+      })
     }
   }
 };
