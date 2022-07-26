@@ -244,13 +244,39 @@ let spawnNextPiece = () => {
   GAME_STATE.nextPiece = getRandomPiece();
 };
 
-// https://tetris.fandom.com/wiki/Line_clear
+let lineClear = () => {
+  for (let i = 0; i < GAME_STATE.gameMap.length; i++) {
+    let isLineClear = true;
+    let mapRow = GAME_STATE.gameMap[i];
+
+    for (let j = 0; j < mapRow.length; j++) {
+      if (mapRow[j].imageX === -1) isLineClear = false;
+    }
+
+    if (isLineClear) {
+      GAME_STATE.score += 1000;
+
+      // Move down pixels
+      for (let j = i; j > 0; j--) {
+        GAME_STATE.gameMap[j] = GAME_STATE.gameMap[j - 1];
+      }
+
+      // Special case: Move down pixels from row zero
+      let temp = [];
+      for (let j = 0; j < squareCountX; j++) {
+        temp.push({ imageX: -1, imageY: -1 });
+      }
+      GAME_STATE.gameMap[0] = temp;
+    }
+  }
+};
 
 let update = () => {
   if (GAME_STATE.isGameOver) return;
 
   const pieceFalled = fallCurrentPiece();
   if (!pieceFalled) {
+    lineClear();
     spawnNextPiece();
 
     if (!GAME_STATE.currentPiece.checkBottom()) {
